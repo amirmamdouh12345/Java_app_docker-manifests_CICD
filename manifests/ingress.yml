@@ -1,0 +1,19 @@
+apiVersion: 
+kind: Ingress
+metadata:
+   name: my-ingress
+
+spec:
+  ingressClassName: nginx
+  rules:
+   - host: www.amir.com
+     http:
+       paths:
+       - path: /api
+         pathType: Prefix
+         backend:
+           service:
+             name: dep-svc
+             port: 
+                number: 8081 
+         

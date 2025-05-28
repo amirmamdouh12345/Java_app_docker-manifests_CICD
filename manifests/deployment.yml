@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: java-deployment
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: deployment
+
+  template:
+    metadata:
+      name: java-replica   
+      labels:
+        app: deployment
+           
+    spec:
+      containers: 
+         - name: ivolve-java-container  
+           image: amirmamdouh123/ivolve_project
+           ports:
+             - containerPort: 8081
+           imagePullPolicy: IfNotPresent 
