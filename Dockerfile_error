@@ -3,7 +3,7 @@ FROM gradle:7.3.3-jdk17 AS builder
 
 WORKDIR /app
 
-COPY ./FinalProjectCode/web-app/ .
+COPY ./web-app/ .
 
 #ENTRYPOINT ["sleep","10000"]
 

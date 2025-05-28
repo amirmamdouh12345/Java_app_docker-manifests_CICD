@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd FinalProjectCode/web-app/
+cd web-app/
 
 ./gradlew  build  
 

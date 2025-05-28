@@ -10,7 +10,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 
-COPY ./FinalProjectCode/web-app/build/libs/demo-0.0.1-SNAPSHOT.jar ./
+COPY ./web-app/build/libs/demo-0.0.1-SNAPSHOT.jar ./
 
 #RUN mvn clean package
 
