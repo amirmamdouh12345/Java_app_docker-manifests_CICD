@@ -1,0 +1,23 @@
+FROM gradle:7.3.3-jdk17 AS builder
+
+
+WORKDIR /app
+
+COPY ./FinalProjectCode/web-app/ .
+
+#ENTRYPOINT ["sleep","10000"]
+
+RUN chmod +x ./gradlew
+
+RUN ./gradlew wrapper --gradle-version 7.3.3
+
+
+RUN ./gradlew clean build
+
+FROM  eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/build/libs/*jar app.jar
+
+ENTRYPOINT ["java","-jar","app.jar"]
