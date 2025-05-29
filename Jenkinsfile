@@ -4,21 +4,28 @@ pipeline {
     stages {
         stage('git clone') {
             steps {
-            git 'https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD.git'   
+                sh 'mkdir -p ./application' 
+                dir('application'){
+                git 'https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD.git'   
+                }
             }
         }
+        
+        
         stage('test and build app') {
             steps {
-                dir('web-app'){
+                dir('application/web-app'){
                   sh './gradlew test'
                   sh './gradlew build'
                 }
             }
         }
 
+
         stage('docker build and push to dockerhub') {
             steps {
-               sh 'docker build -t amirmamdouh123/ivolve_project .'
+                
+               sh 'docker build -t amirmamdouh123/ivolve_project ./application'
 
                 withCredentials([usernamePassword(credentialsId:'docker-cred',usernameVariable:'USERNAME',passwordVariable:'PASSWORD' )]){
                     sh'''
@@ -29,7 +36,33 @@ pipeline {
             }
             
         }
+        
+        
+        stage('push updates to ') {
+            steps {
+                
+                sh 'mkdir -p ./argocd'
+                
+                dir('argocd'){
+                git 'https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD_argoCD.git'   
+                
+                sh 'git add ./manifests'
+                sh 'git commit -m "upload kubernetes updates"'
+                
+                
+                withCredentials([string(credentialsId:'github_token',variable:'GITHUB_TOKEN')]){
+                    
+                    sh 'echo "https://amirmamdouh12345:$GITHUB_TOKEN@github.com" > ~/.git-credentials'
+                    sh 'git push origin master'
+                    
+                }
+                
+                }
+                
+            }
+        }
+        
+        
 
     }
 }
-
