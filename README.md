@@ -11,6 +11,4 @@
 7. Run container.
 8. Verify container is working.
  
-
-  
 ![](https://github.com/IbrahimAdell/FinalProjectCode/blob/main/App.PNG)
