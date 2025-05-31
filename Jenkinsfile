@@ -46,18 +46,34 @@ pipeline {
                 dir('argocd'){
                 git 'https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD_argoCD.git'   
                 
-                sh 'git add ./manifests'
-                sh 'git commit -m "upload kubernetes updates"'
                 
-                
-                withCredentials([string(credentialsId:'github_token',variable:'GITHUB_TOKEN')]){
+                sh 'git config --global user.name "amirmamdouh12345"'
+                sh 'git config --global user.email "amir.mam.alx@gmail.com"'
+                script {
+                    try {
                     
-                    sh 'echo "https://amirmamdouh12345:$GITHUB_TOKEN@github.com" > ~/.git-credentials'
-                    sh 'git push origin master'
-                    
+                        sh 'cp -r ../application/manifests .'
+                        sh 'git add ./manifests'
+                        sh 'git commit -m "upload kubernetes updates"'
+                        
+                        sh 'git config --global credential.helper store'
+                        
+                        withCredentials([string(credentialsId:'github_token',variable:'GITHUB_TOKEN')]){
+                            
+                            sh 'echo "https://amirmamdouh12345:$GITHUB_TOKEN@github.com" > ~/.git-credentials'
+                            sh 'git push origin master'
+                            
+                        }
+                        
+                        echo 'Manifests\'ve just been updated in repo'
+    
+                    }
+                    catch(exp){
+                        echo 'No Updates in maniftests'
+                    }
                 }
                 
-                }
+            }
                 
             }
         }
