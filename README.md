@@ -23,7 +23,7 @@ This project demonstrates a **full CI/CD pipeline** for a Java web application:
 | **App Framework**  | Java (Spring Boot), Gradle                                              |
 
 ---
-https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg
+![](https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg)
 ---
 
 ## ** Repository Structure**  
