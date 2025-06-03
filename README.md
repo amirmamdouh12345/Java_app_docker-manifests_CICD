@@ -78,7 +78,7 @@ The Jenkins pipeline (`Jenkinsfile`) runs these stages:
 
 3. **ArgoCD Auto-Deploys**  
    - ArgoCD detects Git changes → deploys to Minikube.
-   - GitOps-style deployment with ArgoCD handling Kubernetes manifests  ->  Repo: Java_app_docker-manifests_CICD_argoCD
+   - GitOps-style deployment with ArgoCD handling Kubernetes manifests  ->  Repo:  [Java\_app\_docker-manifests\_CICD\_argoCD](https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD_argoCD)
 
 ---
 
