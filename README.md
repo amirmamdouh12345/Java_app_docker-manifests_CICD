@@ -23,7 +23,7 @@ This project demonstrates a **full CI/CD pipeline** for a Java web application:
 | **App Framework**  | Java (Spring Boot), Gradle                                              |
 
 ---
-https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg
+![](https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg)
 ---
 
 ## ** Repository Structure**  
@@ -77,7 +77,8 @@ The Jenkins pipeline (`Jenkinsfile`) runs these stages:
      - Updating ArgoCD’s Git repo.  
 
 3. **ArgoCD Auto-Deploys**  
-   - ArgoCD detects Git changes → deploys to Minikube.  
+   - ArgoCD detects Git changes → deploys to Minikube.
+   - GitOps-style deployment with ArgoCD handling Kubernetes manifests  ->  Repo:  [Java\_app\_docker-manifests\_CICD\_argoCD](https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD_argoCD)
 
 ---
 
