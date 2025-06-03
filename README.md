@@ -1,7 +1,4 @@
  
-![](https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg)
-
----
 
 # **Java App with Docker, Kubernetes, and CI/CD Pipeline**  
  **Automated CI/CD pipeline for a Java (Gradle) app deployed on Kubernetes (Minikube) using Jenkins, ArgoCD, and Ansible.**  
@@ -25,6 +22,8 @@ This project demonstrates a **full CI/CD pipeline** for a Java web application:
 | **Infrastructure** | Ansible (for provisioning Jenkins, Docker, Java, Gradle)                |
 | **App Framework**  | Java (Spring Boot), Gradle                                              |
 
+---
+https://github.com/amirmamdouh12345/Java_app_docker-manifests_CICD/blob/master/proj-structure.jpeg
 ---
 
 ## ** Repository Structure**  
