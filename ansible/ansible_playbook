@@ -1,0 +1,23 @@
+---
+- name: run general rules on master and worker
+  hosts: grp1
+  become: yes
+  roles:
+  - java_plus_git_install 
+  - docker_installation
+  - gradle_installation
+
+
+
+- name: run all rules to install jenkins
+  hosts: jenkins-instance
+  become: yes  
+  roles: 
+  - jenkins_install
+  - sonarqube_install
+
+- name: run worker jenkins roles
+  hosts: jenkins-worker
+  become: yes
+  roles:
+  - worker_jenkins_installation 

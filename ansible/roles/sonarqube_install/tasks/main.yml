@@ -1,0 +1,219 @@
+---
+# tasks file for sonarqube_install
+
+# install java in another role
+
+- name: install postgres 
+  dnf: 
+     name: postgresql15-server-15.7-1.amzn2023.0.1.x86_64
+     state: present
+     update_cache: yes
+  notify:
+
+- name: create database cluster
+  command: postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/postgresql.conf
+
+
+- name: start postgres
+  service:
+     name: postgresql
+     state: started
+     enabled: yes
+
+- name: add password to postgres user
+  command: "echo postgres:{{ password }} | chpasswd"
+ 
+
+- name: adjust Postgres Configurations 
+  block: 
+          
+           - name: add sonar user inside db
+             command: sudo -u postgres createuser sonar
+             register: createuser_result
+             failed_when:
+                - createuser_result.rc != 0
+                - "'already exists' not in createuser_result.stderr"
+               
+           - name: put password to sonar user
+             command: sudo -u postgres psql -c "ALTER USER sonar WITH ENCRYPTED PASSWORD '{{ password }}';"
+        
+           - name: create sonar database
+             command: sudo -u postgres psql -c "CREATE DATABASE sonarqube OWNER sonar ;"  # OWNER sonar     
+             register: createdb_result
+             failed_when:
+               - createdb_result != 0
+               - "'already exists' not in createdb_result.stderr"
+
+
+           - name: Grant all priviledges
+             command: sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonar;"
+
+           - name: restart postgres
+             service: 
+                       name: postgresql
+                       state: restarted          
+
+
+- name: prepare sonarqube directory sonarqube 
+  file: 
+    name: /sonarqube/
+    state: directory
+
+- name: install sonarqube zip file
+  get_url: 
+     url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.8.100196.zip
+     dest: /sonarqube/sonarqube.zip
+
+- name: unarchive sonarqube zip
+  unarchive:
+     src: /sonarqube/sonarqube.zip
+     dest: /opt/
+     mode: '0644'
+     remote_src: yes
+
+- name: change sonarqube dir name
+  command: 'mv /opt/sonarqube-9.9.8.100196 /opt/sonarqube '
+  args:
+    creates: /opt/sonarqube
+
+- name: create sonar group
+  group:
+    name: sonar
+    state: present
+
+- name: create sonar user
+  user:
+    name: sonar
+    groups: sonar
+    shell: /bin/bash
+
+- name: delegate ownership to sonar 
+  file:
+    path: /opt/sonarqube
+    owner: sonar
+    group: sonar 
+    mode: '0664'
+    recurse: yes
+
+- name: Adjust sonar configurations
+  block: 
+              - name: insert sonar configurations in sonar.service
+                copy:
+                  content: |
+                    sonar.jdbc.username=sonar
+                    sonar.jdbc.password=admin123
+                    sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube
+                    sonar.web.host=0.0.0.0
+                    sonar.web.port=9000
+                    sonar.web.javaAdditionalOpts=-server
+                    sonar.search.javaOpts=-Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError
+                    sonar.log.level=INFO
+                    sonar.path.logs=logs
+                  dest: /opt/sonarqube/conf/sonar.properties
+              
+              - name: Create systemd service
+                copy:
+                  content: |
+                      [Unit]
+                      Description=SonarQube service
+                      After=syslog.target network.target
+
+                      [Service]
+                      Type=forking
+                      ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+                      ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+                      User=sonar
+                      Group=sonar
+                      Restart=always
+                      LimitNOFILE=65536
+                      LimitNPROC=4096
+                             
+                      [Install]
+                      WantedBy=multi-user.target
+                  dest: /etc/systemd/system/sonarqube.service   
+
+              - name: Reload systemd and enable service
+                systemd:
+                   daemon_reload: yes
+                   enabled: yes
+                   name: sonarqube
+
+
+
+- name: Configure Nginx
+  block:
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Remove default sites
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - '/etc/nginx/sites-enabled/default'
+        - '/etc/nginx/sites-available/default'
+
+    - name: create nginx config dir
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '1777'
+      loop:
+        - '/etc/nginx/sites-available'
+        - '/etc/nginx/sites-enabled'
+
+    - name: Create Nginx config
+      copy:
+        content: |
+             server{
+                listen      80; 
+                server_name sonarqube.groophy.in;
+ 
+                access_log  /var/log/nginx/sonar.access.log;
+                error_log   /var/log/nginx/sonar.error.log;
+
+                proxy_buffers 16 64k;
+                proxy_buffer_size 128k;
+
+                 location / {
+                    proxy_pass  http://127.0.0.1:9000;
+                    proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                    proxy_redirect off;
+                                        
+                    proxy_set_header    Host            $host;
+                    proxy_set_header    X-Real-IP       $remote_addr;
+                    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header    X-Forwarded-Proto http;
+                  }  
+              }
+        dest: /etc/nginx/sites-available/sonarqube
+
+    - name: start nginx
+      service: 
+         name: nginx
+         state: started
+         enabled: yes
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/sonarqube
+        dest: /etc/nginx/sites-enabled/sonarqube
+        state: link
+
+#- name: permit ospf traffic
+#  ansible.posix.firewalld:
+#    port: '{{ item }}/tcp'
+#    permanent: true
+#    state: enabled
+#  loop:
+#        - 80
+#        - 9000
+#        - 9001
+
+- name: Reboot system
+  reboot:
+    reboot_timeout: 300

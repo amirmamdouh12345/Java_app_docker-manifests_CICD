@@ -1,0 +1,12 @@
+---
+# handlers file for docker_installation
+
+- name: clean dnf cache
+  command: "dnf clean all "
+
+- name: update dnf cache
+  command: "dnf makecache"
+
+- name: update yum cache
+  yum:
+    update_cache: yes

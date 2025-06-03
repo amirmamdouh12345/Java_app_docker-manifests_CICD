@@ -1,0 +1,4 @@
+---
+# vars file for sonarqube_install
+
+password: admin123

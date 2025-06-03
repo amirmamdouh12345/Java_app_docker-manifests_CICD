@@ -1,0 +1,49 @@
+---
+# tasks file for docker_installation
+
+- name: install yum-utils
+  become: yes
+  package: 
+    name: yum-utils
+    
+    state: present
+
+#- name: all the repo
+#  become: yes
+#  shell: 'yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo'
+
+#- name: Import Docker GPG key
+#  become: yes
+#  rpm_key:
+#    key: https://download.docker.com/linux/centos/gpg
+#    state: present
+
+
+- name: Add Docker repository
+  yum_repository:
+      name: docker-ce
+      description: Docker CE Repository
+      baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+      enabled: yes
+      gpgcheck: yes
+      gpgkey: https://download.docker.com/linux/centos/gpg
+  notify:
+    - clean dnf cache
+    - update dnf cache
+    - update yum cache
+
+- name:
+  package:
+    name: '{{ item }}'
+    enablerepo: docker-ce-stable
+    state: present
+  loop:
+    - docker-ce-cli
+    - docker-ce
+    - containerd.io
+
+- name: start docker
+  service:
+    name: docker
+    state: started
+    enabled: yes

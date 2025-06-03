@@ -1,0 +1,22 @@
+---
+# tasks file for gradle_installation
+
+
+
+- name: install gradle
+  command: wget https://services.gradle.org/distributions/gradle-7.6.1-bin.zip
+  args:
+    creates: gradle-7.6.1-bin.zip
+
+- name: unzip gradle
+  unarchive:
+    src: /home/ec2-user/gradle-7.6.1-bin.zip
+    dest: /opt
+    remote_src: yes
+
+- name: softlink for gradle to env path
+  file:
+    src: /opt/gradle-7.6.1/bin/gradle
+    dest: /usr/bin/gradle
+    state: link
+

@@ -1,0 +1,28 @@
+---
+# tasks file for worker_jenkins_installation
+
+# java previously installed
+
+- name: create group jenkins
+  group:
+    name: jenkins
+    state: present
+
+
+- name: create jenkins user
+  user:
+    name: jenkins
+    group: jenkins
+    groups: docker
+    append: yes
+    home: /home/jenkins
+    shell: /bin/bash
+    create_home: yes
+
+- name: create home dir
+  file:
+    path: /home/jenkins
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0755'
